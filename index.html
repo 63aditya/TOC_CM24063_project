@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLG to RLG Inter-converter | Theory of Computation PBL</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="topbar"><div class="logo">Σ</div><span>LLG to RLG Inter-converter</span></div>
+<main>
+<section class="card hero">
+  <span class="badge">Left-Linear Grammar → Right-Linear Grammar</span>
+  <h1>LLG to RLG Inter-converter</h1>
+  <p class="lead">Transform a Left-Linear Grammar directly into an equivalent Right-Linear Grammar, and prove that the language is preserved.</p>
+  <p class="who"><b>Aditya Dhondiba Kangire</b> · CM24063 · 5th Semester CSE (AI&amp;ML)<br>Theory of Computation (N-PCCCM503T) · S. B. Jain Institute of Technology, Management &amp; Research, Nagpur · Session 2026–27 (ODD)</p>
+  <hr>
+  <h4>VERIFICATION TEST CASES (CLICK TO TEST):</h4>
+  <div id="testBtns" class="tbtns"></div>
+  <button id="btnAll" class="btn ghost">Run all verification tests</button>
+  <div id="testBanner" class="banner" hidden></div>
+</section>
+
+<section class="card" id="sec1">
+  <h2><i>1</i>Section 1 — Left-Linear Grammar</h2>
+  <label for="grammar">Grammar (one production per line)</label>
+  <textarea id="grammar" rows="5" spellcheck="false" placeholder="S -> Aa | b&#10;A -> Sb | a"></textarea>
+  <p class="hint">Example: <code>S -&gt; Aa | b</code> then <code>A -&gt; Sb | a</code>. Use <code>-&gt;</code> or <code>→</code>, <code>|</code> for alternatives, <code>ε</code> for the empty string. Capitals = non-terminals, lowercase/digits = terminals. The non-terminal goes on the <b>left</b> of the terminal (A → Ba). First line = start symbol.</p>
+  <div class="btns">
+    <button id="btnGen" class="btn primary">Convert to RLG</button>
+    <button id="btnEx" class="btn">Load Example</button>
+    <button id="btnClear" class="btn">Clear</button>
+    <button id="btnReset" class="btn">Reset</button>
+  </div>
+  <div class="detect">
+    <div><span>Detected non-terminals (V)</span><div id="ntChips" class="pills">—</div></div>
+    <div><span>Detected terminals (T)</span><div id="tmChips" class="pills">—</div></div>
+    <div><span>Start symbol (S)</span><div id="stChips" class="pills">—</div></div>
+  </div>
+  <div id="validation" class="status" hidden></div>
+</section>
+
+<section class="card" id="sec2" hidden>
+  <h2><i>2</i>Section 2 — Convert to RLG</h2>
+  <div id="cards" class="cards"></div>
+  <div class="outhead"><h3>Equivalent Right-Linear Grammar</h3><button id="btnCopy" class="btn ghost small">Copy RLG</button></div>
+  <pre id="rlgOut" class="codebox"></pre>
+  <p id="rlgNote" class="hint"></p>
+  <div id="integrity" class="status" style="margin-top:12px"></div>
+  <h3>Conversion table (rule by rule)</h3>
+  <div class="tablewrap"><table id="ttable"></table></div>
+  <h3>Transition function δ of the intermediate automaton</h3>
+  <p class="hint">→ start state · * final state · ∅ no transition</p>
+  <div class="tablewrap"><table id="matrix"></table></div>
+  <h3>Automaton behind the RLG</h3>
+  <div id="diagram" class="diagram"></div>
+  <p class="hint">Double circle = final state · arrow labelled "start" = new start symbol · generated dynamically from the grammar. Each arrow p --a--&gt; q is the RLG production <code>p → aq</code>.</p>
+  <div class="note"><b>Conversion convention</b>
+    <ul><li><code>A → Ba</code> gives the move <code>B --a--&gt; A</code>, i.e. the RLG rule <code>B → aA</code></li><li><code>A → a</code> gives <code>Z --a--&gt; A</code>, i.e. <code>Z → aA</code>, where Z is the new start symbol</li><li><code>A → ε</code> gives no rule of its own: the moves of A are copied to Z</li><li>The LLG start symbol S becomes the final state: <code>S → ε</code></li></ul>
+    <ul id="convNote"></ul></div>
+</section>
+
+<section class="card" id="sec3" hidden>
+  <h2><i>3</i>Section 3 — Check a String</h2>
+  <label for="teststr">Enter String</label>
+  <input id="teststr" type="text" autocomplete="off" spellcheck="false" placeholder="e.g. bba (leave empty to test ε)">
+  <button id="btnTest" class="btn primary wide">Check String in both grammars</button>
+  <div id="result"></div>
+</section>
+
+<section class="card">
+  <h2><i>4</i>Theory in Brief</h2>
+  <details><summary>What is a Left-Linear Grammar?</summary><p>G = (V, T, P, S) where every production is <code>A → Bw</code> or <code>A → w</code>: a non-terminal may appear only at the left end. This tool uses the normal form <code>A → Ba | a | ε</code>. LLGs generate exactly the regular languages, just like right-linear grammars.</p></details>
+  <details><summary>Why is the conversion not just "flip each rule"?</summary><p>Flipping every rule <code>A → Ba</code> into <code>A → aB</code> gives a right-linear grammar for the <b>reversed</b> language L<sup>R</sup>, not for L. To keep L itself, the construction reverses the automaton: the flipped grammar is read as an NFA, the NFA is reversed (start and final states swap roles, arrows turn around), and the result is written back as an RLG.</p></details>
+  <details><summary>The construction used here</summary><p>Add a new start state Z. For <code>A → Ba</code> add the move B --a--&gt; A. For <code>A → a</code> add Z --a--&gt; A. For <code>A → ε</code> copy every move of A to Z. The old start symbol S is the only final state (and Z is final too when ε ∈ L). Write every move p --a--&gt; q as <code>p → aq</code> and every final state f as <code>f → ε</code>.</p></details>
+  <details><summary>How is language integrity checked?</summary><p>Both grammars are enumerated independently by dynamic programming on word length, and the sets of all words up to a bound are compared. The "Check a String" section also derives the string in each grammar. Any difference would be reported as a mismatch.</p></details>
+</section>
+</main>
+<footer>Aditya Dhondiba Kangire | CM24063 | Theory of Computation</footer>
+<script src="script.js"></script>
+</body>
+</html>
